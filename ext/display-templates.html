@@ -10,6 +10,7 @@
             <button class="action-button action-add-note" hidden disabled data-mode="term-kanji" title="Add expression" data-hotkey='["addNoteTermKanji","title","Add expression ({0})"]'><span class="action-icon icon color-icon" data-icon="add-term-kanji"></span></button>
             <button class="action-button action-add-note" hidden disabled data-mode="term-kana" title="Add reading" data-hotkey='["addNoteTermKana","title","Add reading ({0})"]'><span class="action-icon icon color-icon" data-icon="add-term-kana"></span></button>
             <button class="action-button action-play-audio" title="Play audio" data-title-default="Play audio" data-hotkey='["playAudio",["title","data-title-default"],"Play audio ({0})"]' data-menu-position="left below h-cover v-cover"><span class="action-icon icon color-icon" data-icon="play-audio"></span><span class="action-button-badge icon" hidden></span></button>
+            <button class="action-button action-display-example-sentences" data-icon="display-example-sentences" title="Show example sentences" data-hotkey='["displayExampleSentences",["title","data-title-default"],"Display example sentences ({0})"]' data-menu-position="left below h-cover v-cover"><div class="action-button-badge icon" hidden></div></button>
             <span class="entry-current-indicator-icon" title="Current entry"><span class="icon color-icon" data-icon="entry-current"></span></span>
         </div>
         <div class="headword-list"></div>
@@ -131,6 +132,29 @@
 <template id="kanji-info-table-empty-template"><tr class="kanji-info-table-item kanji-info-table-item-empty"><td class="kanji-info-table-item-value-empty">No data found</td></tr></template>
 <template id="kanji-gloss-item-template"><li class="kanji-gloss-item"><span class="kanji-gloss-content"></span></li></template>
 <template id="kanji-reading-template"><dd class="kanji-reading"></dd></template>
+
+<!-- Sentences entry templates -->
+<template id="sentence-entry-template" data-remove-whitespace-text="true"><div class="entry" data-type="sentence">
+    <div class="entry-current-indicator" title="Current entry"><span class="entry-current-indicator-inner"></span></div>
+    <div class="entry-body">
+        <div class="sentence-top">
+            <span class="headword-current-indicator"></span>
+            <ul class="sentence-japanese"></ul>
+        </div>
+        <div class="sentence-bottom">
+            <span class="sentence-english"></span>
+        </div>
+    </div>
+    <div class="debug-info"><a tabindex="0" class="debug-log-link">Log debug info to console</a></div>
+</div></template>
+<template id="sentence-japanese-fragment-template"><li class="sentence-japanese-fragment"><span class="furigana"></span><span class="unlinked"></span><span class="other"></span></li></template>
+
+<!-- Sentences entry navigation -->
+<template id="sentence-navigation-entry-template" data-remove-whitespace-text="true"><div id="navigation-bar">
+    <div id="navigation-results"></div>
+    <div id="navigation-buttons"></div>
+</div></template>
+<template id="navigation-button-template"><button class="action-button action-navigate-page nav-button"></button></template>
 
 <!-- Tag templates -->
 <template id="tag-template"><span class="tag"><span class="tag-label"><span class="tag-label-content"></span></span></span></template>
