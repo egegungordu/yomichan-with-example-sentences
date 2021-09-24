@@ -242,6 +242,7 @@ body {
 .icon[data-icon=palette]                 { --icon-image: url(/images/palette.svg); }
 .icon[data-icon=popup]                   { --icon-image: url(/images/popup.svg); }
 .icon[data-icon=speaker]                 { --icon-image: url(/images/speaker.svg); }
+.icon[data-icon=sentences]               { --icon-image: url(/images/sentences.svg); }
 .icon[data-icon=scanning]                { --icon-image: url(/images/scanning.svg); }
 .icon[data-icon=text-parsing]            { --icon-image: url(/images/text-parsing.svg); }
 .icon[data-icon=translation]             { --icon-image: url(/images/translation.svg); }
