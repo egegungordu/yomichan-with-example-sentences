@@ -155,6 +155,116 @@ class DisplayGenerator {
         return node;
     }
 
+    createSentencesEntry(sentence) {
+        const node = this._templates.instantiate("sentence-entry");
+        const englishSentenceContainer =
+            node.querySelector(".sentence-english");
+        const japaneseSentenceContainer =
+            node.querySelector(".sentence-japanese");
+
+        this._setTextContent(englishSentenceContainer, sentence.english, "en");
+
+        this._appendMultiple(
+            japaneseSentenceContainer,
+            this._createSentenceFragment.bind(this),
+            sentence.japanese
+        );
+
+        return node;
+    }
+
+    _createSentenceFragment(fragment) {
+        const node = this._templates.instantiate("sentence-japanese-fragment");
+        const furiganaContainer = node.querySelector(".furigana");
+        const unlinkedContainer = node.querySelector(".unlinked");
+        const otherContainer = node.querySelector(".other");
+        this._setTextContent(furiganaContainer, fragment.furigana, "ja");
+        this._setTextContent(unlinkedContainer, fragment.unlinked, "ja");
+        this._setTextContent(otherContainer, fragment.other, "ja");
+        return node;
+    }
+
+    createSentenceNavigationEntry(currentPage, resultCount, pageCount) {
+        const node = this._templates.instantiate("sentence-navigation-entry");
+        const resultsContainer = node.querySelector("#navigation-results");
+        const buttonsContainer = node.querySelector("#navigation-buttons");
+
+        const buttonsInfo = this._createNavButtonsInfo(currentPage, pageCount);
+
+        if(resultCount !== null){
+            this._appendMultiple(
+                buttonsContainer,
+                this._createNavigationButton.bind(this),
+                buttonsInfo
+            );
+        }
+
+        this._setTextContent(
+            resultsContainer,
+            (resultCount || "No") + " sentences found",
+            "en"
+        );
+
+        return node;
+    }
+
+    _createNavigationButton(buttonInfo){
+        const node = this._templates.instantiate("navigation-button");
+
+        switch (buttonInfo.arrow) {
+            case "previous":
+                this._setTextContent(node, "<", "en");
+                break;
+            case "next":
+                this._setTextContent(node, ">", "en");
+                break;
+            default:
+                this._setTextContent(node, buttonInfo.page, "en");
+                break;
+        }
+
+        node.disabled = buttonInfo.disabled;
+        node.dataset.page = buttonInfo.page;
+
+        return node;
+    }
+
+    _createNavButtonsInfo(currentPage, pageCount) {
+        // somehow works ?
+        const startL = Math.max(currentPage - 3, 1);
+        const startR = Math.min(currentPage - 3, pageCount - 5);
+        const endL = Math.max(currentPage + 2, 6);
+        const endR = Math.min(currentPage + 2, pageCount);
+        const start = Math.max(currentPage - 3 < 1 ? startL : startR, 1);
+        const end = Math.min(currentPage - 3 < 1 ? endL : endR, pageCount);
+        const buttonsInfo = [];
+
+        if(currentPage !== 1) {
+            buttonsInfo.push({
+                page: currentPage - 1,
+                disabled: false,
+                arrow: "previous"
+            });
+        }
+
+        for(let i = start; i <= end; i++){
+            buttonsInfo.push({
+                page: i,
+                disabled: i === currentPage
+            });
+        }
+
+        if (currentPage !== pageCount) {
+            buttonsInfo.push({
+                page: currentPage + 1,
+                disabled: false,
+                arrow: "next",
+            });
+        }
+
+        return buttonsInfo;
+    }
+
     createEmptyFooterNotification() {
         return this._templates.instantiate('footer-notification');
     }
