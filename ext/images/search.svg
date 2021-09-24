@@ -1,0 +1,28 @@
+<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <defs>
+  <linearGradient y2="0.18181" y1="0.88634" x2="0.50002" x1="0.92858" id="linearGradient4825">
+   <stop offset="0" stop-color="#777772"/>
+   <stop offset="1" stop-color="#a9a9a9"/>
+  </linearGradient>
+  <linearGradient y2="0.2857" y1="0.92854" x2="0.125" x1="0.125" id="linearGradient4869-7">
+   <stop offset="0" stop-opacity="0" stop-color="#fff"/>
+   <stop offset="1" stop-color="#fff"/>
+  </linearGradient>
+  <linearGradient gradientUnits="userSpaceOnUse" gradientTransform="matrix(3.7795 0 0 3.7795 8.5 -2.9535e-7)" y2="0.7276" y1="3.4396" x2="-1.5875" x1="-0.26458" id="svg_22">
+   <stop offset="0" stop-color="#5d5d5a"/>
+   <stop offset="1" stop-color="#90908f"/>
+  </linearGradient>
+  <linearGradient gradientUnits="userSpaceOnUse" gradientTransform="matrix(3.7795 0 0 3.7795 8.5 -2.9535e-7)" y2="0.7276" y1="3.4396" x2="-1.5875" x1="-0.26458" id="svg_29">
+   <stop offset="0" stop-color="#5d5d5a"/>
+   <stop offset="1" stop-color="#90908f"/>
+  </linearGradient>
+ </defs>
+ <g>
+  <title>Layer 1</title>
+  <ellipse ry="5" rx="5" id="svg_6" cy="6" cx="6" fill="url(#linearGradient4825)"/>
+  <ellipse ry="5" rx="5" id="svg_26" cy="5.94276" cx="5.94276" stroke="url(#svg_22)" fill="none"/>
+  <path transform="rotate(30 4.53405 5.18657)" stroke-width="2" id="svg_14" d="m6.45064,1.62104c-5.11784,0.06734 -5.22546,7.11759 0.04053,7.13105" opacity="NaN" stroke-opacity="0.50196" stroke="url(#linearGradient4869-7)" fill="none"/>
+
+  <rect transform="rotate(45 12.0976 12.0926)" stroke="url(#svg_29)" stroke-width="2" id="svg_27" height="0.52383" width="4.91582" y="11.83067" x="9.63973" fill="none"/>
+ </g>
+</svg>
