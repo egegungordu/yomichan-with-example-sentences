@@ -107,6 +107,7 @@ class Display extends EventDispatcher {
         this._tagNotification = null;
         this._footerNotificationContainer = document.querySelector('#content-footer');
         this._displayAudio = new DisplayAudio(this);
+        this._displaySentences = new DisplaySentences(this);
         this._queryPostProcessor = null;
         this._optionToggleHotkeyHandler = new OptionToggleHotkeyHandler(this);
         this._elementOverflowController = new ElementOverflowController();
@@ -122,6 +123,7 @@ class Display extends EventDispatcher {
             ['historyBackward',   () => { this._sourceTermView(); }],
             ['historyForward',    () => { this._nextTermView(); }],
             ['playAudio',         () => { this._playAudioCurrent(); }],
+            ["displayExampleSentences",() => { this._displayExampleSentencesCurrent(); }],
             ['playAudioFromSource', this._onHotkeyActionPlayAudioFromSource.bind(this)],
             ['copyHostSelection', () => this._copyHostSelection()],
             ['nextEntryDifferentDictionary',     () => { this._focusEntryWithDifferentDictionary(1, true); }],
@@ -228,6 +230,7 @@ class Display extends EventDispatcher {
         await this._hotkeyHelpController.prepare();
         await this._displayGenerator.prepare();
         this._displayAudio.prepare();
+        this._displaySentences.prepare();
         this._displayAnki.prepare();
         this._queryParser.prepare();
         this._history.prepare();
@@ -435,15 +438,19 @@ class Display extends EventDispatcher {
                 documentTitle: document.title
             }
         );
+        const lastUrl = this._history._current.url;
+        const urlSearchParams = new URLSearchParams(lastUrl);
+        const reading = urlSearchParams.get("reading");
+        const page = urlSearchParams.get("page");
         const details = {
             focus: false,
-            historyMode: 'clear',
-            params: this._createSearchParams(type, query, false),
+            historyMode: "clear",
+            params: this._createSearchParams(type, query, false, reading, page),
             state,
             content: {
                 dictionaryEntries: null,
-                contentOrigin: this.getContentOrigin()
-            }
+                contentOrigin: this.getContentOrigin(),
+            },
         };
         this.setContent(details);
     }
@@ -570,6 +577,7 @@ class Display extends EventDispatcher {
             this._eventListeners.removeAllEventListeners();
             this._mediaLoader.unloadAll();
             this._displayAudio.cleanupEntries();
+            this._displaySentences.cleanupEntries();
             this._displayAnki.cleanupEntries();
             this._hideTagNotification(false);
             this._dictionaryEntries = [];
@@ -594,30 +602,40 @@ class Display extends EventDispatcher {
 
             // Set content
             switch (type) {
-                case 'terms':
-                case 'kanji':
+                case "terms":
+                case "sentences":
+                case "kanji":
                     {
-                        let query = urlSearchParams.get('query');
-                        if (query === null) { break; }
+                        let query = urlSearchParams.get("query");
+                        if (query === null) {
+                            break;
+                        }
 
                         this._query = query;
                         clear = false;
-                        const isTerms = (type === 'terms');
                         query = this._postProcessQuery(query);
                         this._rawQuery = query;
-                        let queryFull = urlSearchParams.get('full');
-                        queryFull = (queryFull !== null ? this._postProcessQuery(queryFull) : query);
-                        const wildcardsEnabled = (urlSearchParams.get('wildcards') !== 'off');
-                        const lookup = (urlSearchParams.get('lookup') !== 'false');
-                        await this._setContentTermsOrKanji(token, isTerms, query, queryFull, lookup, wildcardsEnabled, eventArgs);
+                        let queryFull = urlSearchParams.get("full");
+                        queryFull =
+                            queryFull !== null
+                                ? this._postProcessQuery(queryFull)
+                                : query;
+
+                        await this._setContentTermsOrKanjiOrSentences(
+                            token,
+                            type,
+                            query,
+                            queryFull,
+                            eventArgs
+                        );
                     }
                     break;
-                case 'unloaded':
+                case "unloaded":
                     {
                         clear = false;
-                        const {content} = this._history;
+                        const { content } = this._history;
                         eventArgs.content = content;
-                        this.trigger('contentUpdating', eventArgs);
+                        this.trigger("contentUpdating", eventArgs);
                         this._setContentExtensionUnloaded();
                     }
                     break;
@@ -752,6 +770,92 @@ class Display extends EventDispatcher {
         }
     }
 
+    async displayExampleSentences(term, reading, page, sentences) {
+        try {
+            if (!this._historyHasState()) {
+                return;
+            }
+            let {
+                state: { sentence, url, documentTitle },
+            } = this._history;
+            if (typeof url !== "string") {
+                url = window.location.href;
+            }
+            if (typeof documentTitle !== "string") {
+                documentTitle = document.title;
+            }
+            const optionsContext = this.getOptionsContext();
+            const details = {
+                focus: false,
+                historyMode: "new",
+                params: this._createSearchParams(
+                    "sentences",
+                    term,
+                    false,
+                    reading,
+                    page
+                ),
+                state: {
+                    focusEntry: 0,
+                    optionsContext,
+                    url,
+                    sentence,
+                    documentTitle,
+                },
+                content: {
+                    dictionaryEntries: sentences,
+                    contentOrigin: this.getContentOrigin(),
+                },
+            };
+            this.setContent(details);
+        } catch (error) {
+            this.onError(error);
+        }
+    }
+
+    async changeExampleSentences(term, reading, page, sentences) {
+        try {
+            if (!this._historyHasState()) {
+                return;
+            }
+            let {
+                state: { sentence, url, documentTitle },
+            } = this._history;
+            if (typeof url !== "string") {
+                url = window.location.href;
+            }
+            if (typeof documentTitle !== "string") {
+                documentTitle = document.title;
+            }
+            const optionsContext = this.getOptionsContext();
+            const details = {
+                focus: false,
+                historyMode: "overwrite",
+                params: this._createSearchParams(
+                    "sentences",
+                    term,
+                    false,
+                    reading,
+                    page
+                ),
+                state: {
+                    focusEntry: 0,
+                    optionsContext,
+                    url,
+                    sentence,
+                    documentTitle,
+                },
+                content: {
+                    dictionaryEntries: sentences,
+                    contentOrigin: this.getContentOrigin(),
+                },
+            };
+            this.setContent(details);
+        } catch (error) {
+            this.onError(error);
+        }
+    }
+
     _onWheel(e) {
         if (e.altKey) {
             if (e.deltaY !== 0) {
@@ -873,30 +977,59 @@ class Display extends EventDispatcher {
         document.documentElement.dataset.theme = themeName;
     }
 
-    async _findDictionaryEntries(isTerms, source, wildcardsEnabled, optionsContext) {
-        if (isTerms) {
-            const findDetails = {};
-            if (wildcardsEnabled) {
-                const match = /^([*\uff0a]*)([\w\W]*?)([*\uff0a]*)$/.exec(source);
-                if (match !== null) {
-                    if (match[1]) {
-                        findDetails.wildcard = 'prefix';
-                    } else if (match[3]) {
-                        findDetails.wildcard = 'suffix';
+    async _findDictionaryEntries(type, source, optionsContext, eventArgs) {
+        switch (type) {
+            case "terms": {
+                const wildcardsEnabled =
+                    eventArgs.urlSearchParams.get("wildcards") !== "off";
+                const findDetails = {};
+                if (wildcardsEnabled) {
+                    const match = /^([*\uff0a]*)([\w\W]*?)([*\uff0a]*)$/.exec(
+                        source
+                    );
+                    if (match !== null) {
+                        if (match[1]) {
+                            findDetails.wildcard = "prefix";
+                        } else if (match[3]) {
+                            findDetails.wildcard = "suffix";
+                        }
+                        source = match[2];
                     }
-                    source = match[2];
                 }
-            }
 
-            const {dictionaryEntries} = await yomichan.api.termsFind(source, findDetails, optionsContext);
-            return dictionaryEntries;
-        } else {
-            const dictionaryEntries = await yomichan.api.kanjiFind(source, optionsContext);
-            return dictionaryEntries;
+                const { dictionaryEntries } = await yomichan.api.termsFind(
+                    source,
+                    findDetails,
+                    optionsContext
+                );
+                return dictionaryEntries;
+            }
+            case "kanji": {
+                const dictionaryEntries = await yomichan.api.kanjiFind(
+                    source,
+                    optionsContext
+                );
+                return dictionaryEntries;
+            }
+            case "sentences": {
+                const reading = eventArgs.urlSearchParams.get("reading");
+                const page = eventArgs.urlSearchParams.get("page");
+                const sentences = await yomichan.api.getSentences(
+                    source,
+                    reading,
+                    page
+                );
+                return sentences;
+            }
+            default:
+                return;
         }
     }
 
-    async _setContentTermsOrKanji(token, isTerms, query, queryFull, lookup, wildcardsEnabled, eventArgs) {
+    async _setContentTermsOrKanji(token, type, query, queryFull, eventArgs) {
+        
+        const lookup = eventArgs.urlSearchParams.get("lookup") !== "false";
+
         let {state, content} = this._history;
         let changeHistory = false;
         if (!isObject(content)) {
@@ -926,7 +1059,7 @@ class Display extends EventDispatcher {
 
         let {dictionaryEntries} = content;
         if (!Array.isArray(dictionaryEntries)) {
-            dictionaryEntries = lookup && query.length > 0 ? await this._findDictionaryEntries(isTerms, query, wildcardsEnabled, optionsContext) : [];
+            dictionaryEntries = lookup && query.length > 0 ? await this._findDictionaryEntries(type, query, optionsContext, eventArgs) : [];
             if (this._setContentToken !== token) { return; }
             content.dictionaryEntries = dictionaryEntries;
             changeHistory = true;
@@ -973,28 +1106,45 @@ class Display extends EventDispatcher {
 
         this._displayAnki.setupEntriesBegin();
 
-        for (let i = 0, ii = dictionaryEntries.length; i < ii; ++i) {
+        for (let i = 0, ii = dictionaryEntries.length - (type === "sentences" ? 1 : 0); i < ii; ++i) {
+            // when type is "sentences", skip last element because its doesnt contain a sentence but the object:
+            // {
+            //  resultCount,
+            //  pageCount
+            // {
+            // which will be used for navigation bar
+            
             if (i > 0) {
                 await promiseTimeout(1);
-                if (this._setContentToken !== token) { return; }
+                if (this._setContentToken !== token) {
+                    return;
+                }
             }
 
             const dictionaryEntry = dictionaryEntries[i];
-            const entry = (
-                isTerms ?
-                this._displayGenerator.createTermEntry(dictionaryEntry) :
-                this._displayGenerator.createKanjiEntry(dictionaryEntry)
-            );
+            const entry = this._createEntry(type, dictionaryEntry);
             entry.dataset.index = `${i}`;
             this._dictionaryEntryNodes.push(entry);
             this._addEntryEventListeners(entry);
             this._displayAudio.setupEntry(entry, i);
+            this._displaySentences.setupEntry(entry, i);
             this._displayAnki.setupEntry(entry, i);
             container.appendChild(entry);
             if (focusEntry === i) {
                 this._focusEntry(i, false);
             }
 
+            this._elementOverflowController.addElements(entry);
+        }
+
+        // when the type is sentences, use the last element to create navigation bar
+        if (dictionaryEntries.length !== 0 && type === "sentences") {
+            const { resultCount, pageCount } = dictionaryEntries.at(-1);
+            const currentPage = parseInt(eventArgs.urlSearchParams.get("page"));
+            const entry = this._createNavigationEntry(currentPage, resultCount, pageCount);
+            this._dictionaryEntryNodes.push(entry);
+            this._displaySentences.setupEntry(entry, 0);
+            container.append(entry);
             this._elementOverflowController.addElements(entry);
         }
 
@@ -1008,6 +1158,27 @@ class Display extends EventDispatcher {
 
         this._displayAudio.setupEntriesComplete();
         this._displayAnki.setupEntriesComplete();
+    }
+
+    _createNavigationEntry(currentPage, resultCount, pageCount) {
+        return this._displayGenerator.createSentenceNavigationEntry(
+            currentPage,
+            resultCount,
+            pageCount
+        );
+    }
+
+    _createEntry(type, dictionaryEntry) {
+        switch (type) {
+            case "terms":
+                return this._displayGenerator.createTermEntry(dictionaryEntry);
+            case "kanji":
+                return this._displayGenerator.createKanjiEntry(dictionaryEntry);
+            case "sentences":
+                return this._displayGenerator.createSentencesEntry(dictionaryEntry);
+            default:
+                break;
+        }
     }
 
     _setContentExtensionUnloaded() {
@@ -1174,6 +1345,10 @@ class Display extends EventDispatcher {
         await this._displayAudio.playAudio(this._index, 0);
     }
 
+    async _displayExampleSentencesCurrent() {
+        await this._displaySentences.displaySentences(this._index, 0);
+    }
+
     _getEntry(index) {
         const entries = this._dictionaryEntryNodes;
         return index >= 0 && index < entries.length ? entries[index] : null;
@@ -1209,7 +1384,7 @@ class Display extends EventDispatcher {
         }
     }
 
-    _createSearchParams(type, query, wildcards) {
+    _createSearchParams(type, query, wildcards,  reading = null, page = null) {
         const params = {};
         if (query.length < this._fullQuery.length) {
             params.full = this._fullQuery;
@@ -1223,6 +1398,12 @@ class Display extends EventDispatcher {
         }
         if (this._queryParserVisibleOverride !== null) {
             params['full-visible'] = `${this._queryParserVisibleOverride}`;
+        }
+        if (reading !== null) {
+            params.reading = reading;
+        }
+        if (page !== null) {
+            params.page = page;
         }
         return params;
     }
