@@ -150,16 +150,17 @@ class SearchDisplayController {
         let animate = false;
         let valid = false;
         switch (type) {
-            case 'terms':
-            case 'kanji':
+            case "terms":
+            case "sentences":
+            case "kanji":
                 animate = !!content.animate;
-                valid = (typeof source === 'string' && source.length > 0);
+                valid = typeof source === "string" && source.length > 0;
                 this._display.blurElement(this._queryInput);
                 break;
-            case 'clear':
+            case "clear":
                 valid = false;
                 animate = true;
-                source = '';
+                source = "";
                 break;
         }
 
