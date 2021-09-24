@@ -72,6 +72,10 @@ class API {
         return this._invoke('getTermAudioInfoList', {source, term, reading});
     }
 
+    getSentences(term, reading, page) {
+        return this._invoke("getSentences", { term, reading, page })
+    }
+
     commandExec(command, params) {
         return this._invoke('commandExec', {command, params});
     }
