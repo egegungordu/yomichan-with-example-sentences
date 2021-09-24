@@ -74,6 +74,7 @@
                             "inputs",
                             "clipboard",
                             "accessibility"
+                            "exampleSentences"
                         ],
                         "properties": {
                             "general": {
@@ -402,6 +403,28 @@
                                                 "voice": ""
                                             }
                                         ]
+                                    }
+                                }
+                            },
+                            "exampleSentences": {
+                                "type": "object",
+                                "required": [
+                                    "enabled",
+                                    "furigana",
+                                    "cacheSize"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "furigana": {
+                                        "type": "boolean",
+                                        "default": true
+                                    },
+                                    "cacheSize": {
+                                        "type": "number",
+                                        "default": 5
                                     }
                                 }
                             },
@@ -1079,6 +1102,7 @@
                                             {"action": "playAudio",         "argument": "",  "key": "KeyP",      "modifiers": ["alt"],  "scopes": ["popup", "search"], "enabled": true},
                                             {"action": "viewNote",          "argument": "",  "key": "KeyV",      "modifiers": ["alt"],  "scopes": ["popup", "search"], "enabled": true},
                                             {"action": "copyHostSelection", "argument": "",  "key": "KeyC",      "modifiers": ["ctrl"], "scopes": ["popup"], "enabled": true}
+                                            {"action": "displayExampleSentences", "argument": "",  "key": "KeyS",      "modifiers": ["alt"],  "scopes": ["popup", "search"], "enabled": true}
                                         ]
                                     }
                                 }
