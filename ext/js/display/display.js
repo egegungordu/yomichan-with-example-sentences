@@ -37,7 +37,14 @@
  */
 
 class Display extends EventDispatcher {
-    constructor(tabId, frameId, pageType, japaneseUtil, documentFocusController, hotkeyHandler) {
+    constructor(
+        tabId,
+        frameId,
+        pageType,
+        japaneseUtil,
+        documentFocusController,
+        hotkeyHandler
+    ) {
         super();
         this._tabId = tabId;
         this._frameId = frameId;
@@ -45,10 +52,10 @@ class Display extends EventDispatcher {
         this._japaneseUtil = japaneseUtil;
         this._documentFocusController = documentFocusController;
         this._hotkeyHandler = hotkeyHandler;
-        this._container = document.querySelector('#dictionary-entries');
+        this._container = document.querySelector("#dictionary-entries");
         this._dictionaryEntries = [];
         this._dictionaryEntryNodes = [];
-        this._optionsContext = {depth: 0, url: window.location.href};
+        this._optionsContext = { depth: 0, url: window.location.href };
         this._options = null;
         this._index = 0;
         this._styleNode = null;
@@ -59,39 +66,49 @@ class Display extends EventDispatcher {
         this._displayGenerator = new DisplayGenerator({
             japaneseUtil,
             mediaLoader: this._mediaLoader,
-            hotkeyHelpController: this._hotkeyHelpController
+            hotkeyHelpController: this._hotkeyHelpController,
         });
         this._messageHandlers = new Map();
         this._directMessageHandlers = new Map();
         this._windowMessageHandlers = new Map();
-        this._history = new DisplayHistory({clearable: true, useBrowserHistory: false});
+        this._history = new DisplayHistory({
+            clearable: true,
+            useBrowserHistory: false,
+        });
         this._historyChangeIgnore = false;
         this._historyHasChanged = false;
-        this._navigationHeader = document.querySelector('#navigation-header');
-        this._contentType = 'clear';
+        this._navigationHeader = document.querySelector("#navigation-header");
+        this._contentType = "clear";
         this._defaultTitle = document.title;
         this._titleMaxLength = 1000;
-        this._query = '';
-        this._rawQuery = '';
-        this._fullQuery = '';
+        this._query = "";
+        this._rawQuery = "";
+        this._fullQuery = "";
         this._documentUtil = new DocumentUtil();
-        this._progressIndicator = document.querySelector('#progress-indicator');
+        this._progressIndicator = document.querySelector("#progress-indicator");
         this._progressIndicatorTimer = null;
         this._progressIndicatorVisible = new DynamicProperty(false);
         this._queryParserVisible = false;
         this._queryParserVisibleOverride = null;
-        this._queryParserContainer = document.querySelector('#query-parser-container');
+        this._queryParserContainer = document.querySelector(
+            "#query-parser-container"
+        );
         this._queryParser = new QueryParser({
             getSearchContext: this._getSearchContext.bind(this),
             documentUtil: this._documentUtil,
-            japaneseUtil
+            japaneseUtil,
         });
-        this._contentScrollElement = document.querySelector('#content-scroll');
-        this._contentScrollBodyElement = document.querySelector('#content-body');
+        this._contentScrollElement = document.querySelector("#content-scroll");
+        this._contentScrollBodyElement =
+            document.querySelector("#content-body");
         this._windowScroll = new ScrollElement(this._contentScrollElement);
-        this._closeButton = document.querySelector('#close-button');
-        this._navigationPreviousButton = document.querySelector('#navigate-previous-button');
-        this._navigationNextButton = document.querySelector('#navigate-next-button');
+        this._closeButton = document.querySelector("#close-button");
+        this._navigationPreviousButton = document.querySelector(
+            "#navigate-previous-button"
+        );
+        this._navigationNextButton = document.querySelector(
+            "#navigate-next-button"
+        );
         this._frontend = null;
         this._frontendSetupPromise = null;
         this._depth = 0;
@@ -100,46 +117,137 @@ class Display extends EventDispatcher {
         this._contentOriginTabId = tabId;
         this._contentOriginFrameId = frameId;
         this._childrenSupported = true;
-        this._frameEndpoint = (pageType === 'popup' ? new FrameEndpoint() : null);
+        this._frameEndpoint = pageType === "popup" ? new FrameEndpoint() : null;
         this._browser = null;
         this._copyTextarea = null;
         this._contentTextScanner = null;
         this._tagNotification = null;
-        this._footerNotificationContainer = document.querySelector('#content-footer');
+        this._footerNotificationContainer =
+            document.querySelector("#content-footer");
         this._displayAudio = new DisplayAudio(this);
         this._displaySentences = new DisplaySentences(this);
         this._queryPostProcessor = null;
         this._optionToggleHotkeyHandler = new OptionToggleHotkeyHandler(this);
         this._elementOverflowController = new ElementOverflowController();
         this._displayAnki = new DisplayAnki(this, japaneseUtil);
-        this._frameVisible = (pageType === 'search');
+        this._frameVisible = pageType === "search";
 
         this._hotkeyHandler.registerActions([
-            ['close',             () => { this._onHotkeyClose(); }],
-            ['nextEntry',         this._onHotkeyActionMoveRelative.bind(this, 1)],
-            ['previousEntry',     this._onHotkeyActionMoveRelative.bind(this, -1)],
-            ['lastEntry',         () => { this._focusEntry(this._dictionaryEntries.length - 1, true); }],
-            ['firstEntry',        () => { this._focusEntry(0, true); }],
-            ['historyBackward',   () => { this._sourceTermView(); }],
-            ['historyForward',    () => { this._nextTermView(); }],
-            ['playAudio',         () => { this._playAudioCurrent(); }],
-            ["displayExampleSentences",() => { this._displayExampleSentencesCurrent(); }],
-            ['playAudioFromSource', this._onHotkeyActionPlayAudioFromSource.bind(this)],
-            ['copyHostSelection', () => this._copyHostSelection()],
-            ['nextEntryDifferentDictionary',     () => { this._focusEntryWithDifferentDictionary(1, true); }],
-            ['previousEntryDifferentDictionary', () => { this._focusEntryWithDifferentDictionary(-1, true); }]
+            [
+                "close",
+                () => {
+                    this._onHotkeyClose();
+                },
+            ],
+            ["nextEntry", this._onHotkeyActionMoveRelative.bind(this, 1)],
+            ["previousEntry", this._onHotkeyActionMoveRelative.bind(this, -1)],
+            [
+                "lastEntry",
+                () => {
+                    this._focusEntry(this._dictionaryEntries.length - 1, true);
+                },
+            ],
+            [
+                "firstEntry",
+                () => {
+                    this._focusEntry(0, true);
+                },
+            ],
+            [
+                "historyBackward",
+                () => {
+                    this._sourceTermView();
+                },
+            ],
+            [
+                "historyForward",
+                () => {
+                    this._nextTermView();
+                },
+            ],
+            [
+                "playAudio",
+                () => {
+                    this._playAudioCurrent();
+                },
+            ],
+            [
+                "displayExampleSentences",
+                () => {
+                    this._displayExampleSentencesCurrent();
+                },
+            ],
+            [
+                "playAudioFromSource",
+                this._onHotkeyActionPlayAudioFromSource.bind(this),
+            ],
+            ["copyHostSelection", () => this._copyHostSelection()],
+            [
+                "nextEntryDifferentDictionary",
+                () => {
+                    this._focusEntryWithDifferentDictionary(1, true);
+                },
+            ],
+            [
+                "previousEntryDifferentDictionary",
+                () => {
+                    this._focusEntryWithDifferentDictionary(-1, true);
+                },
+            ],
         ]);
         this.registerDirectMessageHandlers([
-            ['setOptionsContext',  {async: false, handler: this._onMessageSetOptionsContext.bind(this)}],
-            ['setContent',         {async: false, handler: this._onMessageSetContent.bind(this)}],
-            ['clearAutoPlayTimer', {async: false, handler: this._onMessageClearAutoPlayTimer.bind(this)}],
-            ['setCustomCss',       {async: false, handler: this._onMessageSetCustomCss.bind(this)}],
-            ['setContentScale',    {async: false, handler: this._onMessageSetContentScale.bind(this)}],
-            ['configure',          {async: true,  handler: this._onMessageConfigure.bind(this)}],
-            ['visibilityChanged',  {async: false, handler: this._onMessageVisibilityChanged.bind(this)}]
+            [
+                "setOptionsContext",
+                {
+                    async: false,
+                    handler: this._onMessageSetOptionsContext.bind(this),
+                },
+            ],
+            [
+                "setContent",
+                { async: false, handler: this._onMessageSetContent.bind(this) },
+            ],
+            [
+                "clearAutoPlayTimer",
+                {
+                    async: false,
+                    handler: this._onMessageClearAutoPlayTimer.bind(this),
+                },
+            ],
+            [
+                "setCustomCss",
+                {
+                    async: false,
+                    handler: this._onMessageSetCustomCss.bind(this),
+                },
+            ],
+            [
+                "setContentScale",
+                {
+                    async: false,
+                    handler: this._onMessageSetContentScale.bind(this),
+                },
+            ],
+            [
+                "configure",
+                { async: true, handler: this._onMessageConfigure.bind(this) },
+            ],
+            [
+                "visibilityChanged",
+                {
+                    async: false,
+                    handler: this._onMessageVisibilityChanged.bind(this),
+                },
+            ],
         ]);
         this.registerWindowMessageHandlers([
-            ['extensionUnloaded', {async: false, handler: this._onMessageExtensionUnloaded.bind(this)}]
+            [
+                "extensionUnloaded",
+                {
+                    async: false,
+                    handler: this._onMessageExtensionUnloaded.bind(this),
+                },
+            ],
         ]);
     }
 
@@ -218,8 +326,8 @@ class Display extends EventDispatcher {
 
     async prepare() {
         // State setup
-        const {documentElement} = document;
-        const {browser} = await yomichan.api.getEnvironmentInfo();
+        const { documentElement } = document;
+        const { browser } = await yomichan.api.getEnvironmentInfo();
         this._browser = browser;
 
         if (documentElement !== null) {
@@ -237,37 +345,73 @@ class Display extends EventDispatcher {
         this._optionToggleHotkeyHandler.prepare();
 
         // Event setup
-        this._history.on('stateChanged', this._onStateChanged.bind(this));
-        this._queryParser.on('searched', this._onQueryParserSearch.bind(this));
-        this._progressIndicatorVisible.on('change', this._onProgressIndicatorVisibleChanged.bind(this));
-        yomichan.on('extensionUnloaded', this._onExtensionUnloaded.bind(this));
+        this._history.on("stateChanged", this._onStateChanged.bind(this));
+        this._queryParser.on("searched", this._onQueryParserSearch.bind(this));
+        this._progressIndicatorVisible.on(
+            "change",
+            this._onProgressIndicatorVisibleChanged.bind(this)
+        );
+        yomichan.on("extensionUnloaded", this._onExtensionUnloaded.bind(this));
         yomichan.crossFrame.registerHandlers([
-            ['popupMessage', {async: 'dynamic', handler: this._onDirectMessage.bind(this)}]
+            [
+                "popupMessage",
+                { async: "dynamic", handler: this._onDirectMessage.bind(this) },
+            ],
         ]);
-        window.addEventListener('message', this._onWindowMessage.bind(this), false);
+        window.addEventListener(
+            "message",
+            this._onWindowMessage.bind(this),
+            false
+        );
 
-        if (this._pageType === 'popup' && documentElement !== null) {
-            documentElement.addEventListener('mouseup', this._onDocumentElementMouseUp.bind(this), false);
-            documentElement.addEventListener('click', this._onDocumentElementClick.bind(this), false);
-            documentElement.addEventListener('auxclick', this._onDocumentElementClick.bind(this), false);
+        if (this._pageType === "popup" && documentElement !== null) {
+            documentElement.addEventListener(
+                "mouseup",
+                this._onDocumentElementMouseUp.bind(this),
+                false
+            );
+            documentElement.addEventListener(
+                "click",
+                this._onDocumentElementClick.bind(this),
+                false
+            );
+            documentElement.addEventListener(
+                "auxclick",
+                this._onDocumentElementClick.bind(this),
+                false
+            );
         }
 
-        document.addEventListener('wheel', this._onWheel.bind(this), {passive: false});
+        document.addEventListener("wheel", this._onWheel.bind(this), {
+            passive: false,
+        });
         if (this._closeButton !== null) {
-            this._closeButton.addEventListener('click', this._onCloseButtonClick.bind(this), false);
+            this._closeButton.addEventListener(
+                "click",
+                this._onCloseButtonClick.bind(this),
+                false
+            );
         }
         if (this._navigationPreviousButton !== null) {
-            this._navigationPreviousButton.addEventListener('click', this._onSourceTermView.bind(this), false);
+            this._navigationPreviousButton.addEventListener(
+                "click",
+                this._onSourceTermView.bind(this),
+                false
+            );
         }
         if (this._navigationNextButton !== null) {
-            this._navigationNextButton.addEventListener('click', this._onNextTermView.bind(this), false);
+            this._navigationNextButton.addEventListener(
+                "click",
+                this._onNextTermView.bind(this),
+                false
+            );
         }
     }
 
     getContentOrigin() {
         return {
             tabId: this._contentOriginTabId,
-            frameId: this._contentOriginFrameId
+            frameId: this._contentOriginFrameId,
         };
     }
 
@@ -278,17 +422,19 @@ class Display extends EventDispatcher {
         }
     }
 
-    setHistorySettings({clearable, useBrowserHistory}) {
-        if (typeof clearable !== 'undefined') {
+    setHistorySettings({ clearable, useBrowserHistory }) {
+        if (typeof clearable !== "undefined") {
             this._history.clearable = clearable;
         }
-        if (typeof useBrowserHistory !== 'undefined') {
+        if (typeof useBrowserHistory !== "undefined") {
             this._history.useBrowserHistory = useBrowserHistory;
         }
     }
 
     onError(error) {
-        if (yomichan.isExtensionUnloaded) { return; }
+        if (yomichan.isExtensionUnloaded) {
+            return;
+        }
         log.error(error);
     }
 
@@ -307,7 +453,10 @@ class Display extends EventDispatcher {
 
     async updateOptions() {
         const options = await yomichan.api.optionsGet(this.getOptionsContext());
-        const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
+        const {
+            scanning: scanningOptions,
+            sentenceParsing: sentenceParsingOptions,
+        } = options;
         this._options = options;
 
         this._updateHotkeys(options);
@@ -334,15 +483,16 @@ class Display extends EventDispatcher {
                 pointerEventsEnabled: scanningOptions.pointerEventsEnabled,
                 scanLength: scanningOptions.length,
                 layoutAwareScan: scanningOptions.layoutAwareScan,
-                preventMiddleMouse: scanningOptions.preventMiddleMouse.onSearchQuery,
-                sentenceParsingOptions
-            }
+                preventMiddleMouse:
+                    scanningOptions.preventMiddleMouse.onSearchQuery,
+                sentenceParsingOptions,
+            },
         });
 
         this._updateNestedFrontend(options);
         this._updateContentTextScanner(options);
 
-        this.trigger('optionsUpdated', {options});
+        this.trigger("optionsUpdated", { options });
     }
 
     clearAutoPlayTimer() {
@@ -350,8 +500,10 @@ class Display extends EventDispatcher {
     }
 
     setContent(details) {
-        const {focus, params, state, content} = details;
-        const historyMode = this._historyHasChanged ? details.historyMode : 'clear';
+        const { focus, params, state, content } = details;
+        const historyMode = this._historyHasChanged
+            ? details.historyMode
+            : "clear";
 
         if (focus) {
             window.focus();
@@ -361,17 +513,20 @@ class Display extends EventDispatcher {
         for (const [key, value] of Object.entries(params)) {
             urlSearchParams.append(key, value);
         }
-        const url = `${location.protocol}//${location.host}${location.pathname}?${urlSearchParams.toString()}`;
+        const url = `${location.protocol}//${location.host}${
+            location.pathname
+        }?${urlSearchParams.toString()}`;
 
         switch (historyMode) {
-            case 'clear':
+            case "clear":
                 this._history.clear();
                 this._history.replaceState(state, content, url);
                 break;
-            case 'overwrite':
+            case "overwrite":
                 this._history.replaceState(state, content, url);
                 break;
-            default: // 'new'
+            default:
+                // 'new'
                 this._updateHistoryState();
                 this._history.pushState(state, content, url);
                 break;
@@ -380,8 +535,10 @@ class Display extends EventDispatcher {
 
     setCustomCss(css) {
         if (this._styleNode === null) {
-            if (css.length === 0) { return; }
-            this._styleNode = document.createElement('style');
+            if (css.length === 0) {
+                return;
+            }
+            this._styleNode = document.createElement("style");
         }
 
         this._styleNode.textContent = css;
@@ -410,10 +567,10 @@ class Display extends EventDispatcher {
 
     close() {
         switch (this._pageType) {
-            case 'popup':
-                this.invokeContentOrigin('closePopup');
+            case "popup":
+                this.invokeContentOrigin("closePopup");
                 break;
-            case 'search':
+            case "search":
                 this._closeTab();
                 break;
         }
@@ -425,19 +582,19 @@ class Display extends EventDispatcher {
 
     searchLast() {
         const type = this._contentType;
-        if (type === 'clear') { return; }
+        if (type === "clear") {
+            return;
+        }
         const query = this._rawQuery;
-        const state = (
-            this._historyHasState() ?
-            clone(this._history.state) :
-            {
-                focusEntry: 0,
-                optionsContext: this._optionsContext,
-                url: window.location.href,
-                sentence: {text: query, offset: 0},
-                documentTitle: document.title
-            }
-        );
+        const state = this._historyHasState()
+            ? clone(this._history.state)
+            : {
+                  focusEntry: 0,
+                  optionsContext: this._optionsContext,
+                  url: window.location.href,
+                  sentence: { text: query, offset: 0 },
+                  documentTitle: document.title,
+              };
         const lastUrl = this._history._current.url;
         const urlSearchParams = new URLSearchParams(lastUrl);
         const reading = urlSearchParams.get("reading");
@@ -455,23 +612,40 @@ class Display extends EventDispatcher {
         this.setContent(details);
     }
 
-    async invokeContentOrigin(action, params={}) {
-        if (this._contentOriginTabId === this._tabId && this._contentOriginFrameId === this._frameId) {
-            throw new Error('Content origin is same page');
+    async invokeContentOrigin(action, params = {}) {
+        if (
+            this._contentOriginTabId === this._tabId &&
+            this._contentOriginFrameId === this._frameId
+        ) {
+            throw new Error("Content origin is same page");
         }
-        return await yomichan.crossFrame.invokeTab(this._contentOriginTabId, this._contentOriginFrameId, action, params);
+        return await yomichan.crossFrame.invokeTab(
+            this._contentOriginTabId,
+            this._contentOriginFrameId,
+            action,
+            params
+        );
     }
 
-    async invokeParentFrame(action, params={}) {
-        if (this._parentFrameId === null || this._parentFrameId === this._frameId) {
-            throw new Error('Invalid parent frame');
+    async invokeParentFrame(action, params = {}) {
+        if (
+            this._parentFrameId === null ||
+            this._parentFrameId === this._frameId
+        ) {
+            throw new Error("Invalid parent frame");
         }
-        return await yomichan.crossFrame.invoke(this._parentFrameId, action, params);
+        return await yomichan.crossFrame.invoke(
+            this._parentFrameId,
+            action,
+            params
+        );
     }
 
     getElementDictionaryEntryIndex(element) {
-        const node = element.closest('.entry');
-        if (node === null) { return -1; }
+        const node = element.closest(".entry");
+        if (node === null) {
+            return -1;
+        }
         const index = parseInt(node.dataset.index, 10);
         return Number.isFinite(index) ? index : -1;
     }
@@ -484,38 +658,40 @@ class Display extends EventDispatcher {
 
     _onDirectMessage(data) {
         data = this._authenticateMessageData(data);
-        const {action, params} = data;
+        const { action, params } = data;
         const handlerInfo = this._directMessageHandlers.get(action);
-        if (typeof handlerInfo === 'undefined') {
+        if (typeof handlerInfo === "undefined") {
             throw new Error(`Invalid action: ${action}`);
         }
 
-        const {async, handler} = handlerInfo;
+        const { async, handler } = handlerInfo;
         const result = handler(params);
-        return {async, result};
+        return { async, result };
     }
 
-    _onWindowMessage({data}) {
+    _onWindowMessage({ data }) {
         try {
             data = this._authenticateMessageData(data);
         } catch (e) {
             return;
         }
 
-        const {action, params} = data;
+        const { action, params } = data;
         const messageHandler = this._windowMessageHandlers.get(action);
-        if (typeof messageHandler === 'undefined') { return; }
+        if (typeof messageHandler === "undefined") {
+            return;
+        }
 
         const callback = () => {}; // NOP
         invokeMessageHandler(messageHandler, params, callback);
     }
 
-    _onMessageSetOptionsContext({optionsContext}) {
+    _onMessageSetOptionsContext({ optionsContext }) {
         this.setOptionsContext(optionsContext);
         this.searchLast();
     }
 
-    _onMessageSetContent({details}) {
+    _onMessageSetContent({ details }) {
         this.setContent(details);
     }
 
@@ -523,15 +699,22 @@ class Display extends EventDispatcher {
         this.clearAutoPlayTimer();
     }
 
-    _onMessageSetCustomCss({css}) {
+    _onMessageSetCustomCss({ css }) {
         this.setCustomCss(css);
     }
 
-    _onMessageSetContentScale({scale}) {
+    _onMessageSetContentScale({ scale }) {
         this._setContentScale(scale);
     }
 
-    async _onMessageConfigure({depth, parentPopupId, parentFrameId, childrenSupported, scale, optionsContext}) {
+    async _onMessageConfigure({
+        depth,
+        parentPopupId,
+        parentFrameId,
+        childrenSupported,
+        scale,
+        optionsContext,
+    }) {
         this._depth = depth;
         this._parentPopupId = parentPopupId;
         this._parentFrameId = parentFrameId;
@@ -540,7 +723,7 @@ class Display extends EventDispatcher {
         await this.setOptionsContext(optionsContext);
     }
 
-    _onMessageVisibilityChanged({value}) {
+    _onMessageVisibilityChanged({ value }) {
         this._frameVisible = value;
         if (!value) {
             this._displayAudio.clearAutoPlayTimer();
@@ -549,7 +732,9 @@ class Display extends EventDispatcher {
     }
 
     _onMessageExtensionUnloaded() {
-        if (yomichan.isExtensionUnloaded) { return; }
+        if (yomichan.isExtensionUnloaded) {
+            return;
+        }
         yomichan.triggerExtensionUnloaded();
     }
 
@@ -560,13 +745,15 @@ class Display extends EventDispatcher {
             return data;
         }
         if (!this._frameEndpoint.authenticate(data)) {
-            throw new Error('Invalid authentication');
+            throw new Error("Invalid authentication");
         }
         return data.data;
     }
 
     async _onStateChanged() {
-        if (this._historyChangeIgnore) { return; }
+        if (this._historyChangeIgnore) {
+            return;
+        }
 
         const token = {}; // Unique identifier token
         this._setContentToken = token;
@@ -586,19 +773,22 @@ class Display extends EventDispatcher {
 
             // Prepare
             const urlSearchParams = new URLSearchParams(location.search);
-            let type = urlSearchParams.get('type');
-            if (type === null) { type = 'terms'; }
+            let type = urlSearchParams.get("type");
+            if (type === null) {
+                type = "terms";
+            }
 
-            const fullVisible = urlSearchParams.get('full-visible');
-            this._queryParserVisibleOverride = (fullVisible === null ? null : (fullVisible !== 'false'));
+            const fullVisible = urlSearchParams.get("full-visible");
+            this._queryParserVisibleOverride =
+                fullVisible === null ? null : fullVisible !== "false";
             this._updateQueryParser();
 
             let clear = true;
             this._historyHasChanged = true;
             this._contentType = type;
-            this._query = '';
-            this._rawQuery = '';
-            const eventArgs = {type, urlSearchParams, token};
+            this._query = "";
+            this._rawQuery = "";
+            const eventArgs = { type, urlSearchParams, token };
 
             // Set content
             switch (type) {
@@ -643,31 +833,39 @@ class Display extends EventDispatcher {
 
             // Clear
             if (clear) {
-                type = 'clear';
+                type = "clear";
                 this._contentType = type;
-                const {content} = this._history;
+                const { content } = this._history;
                 eventArgs.type = type;
                 eventArgs.content = content;
-                this.trigger('contentUpdating', eventArgs);
+                this.trigger("contentUpdating", eventArgs);
                 this._clearContent();
             }
 
-            const stale = (this._setContentToken !== token);
+            const stale = this._setContentToken !== token;
             eventArgs.stale = stale;
-            this.trigger('contentUpdated', eventArgs);
+            this.trigger("contentUpdated", eventArgs);
         } catch (e) {
             this.onError(e);
         }
     }
 
-    _onQueryParserSearch({type, dictionaryEntries, sentence, inputInfo: {eventType}, textSource, optionsContext}) {
+    _onQueryParserSearch({
+        type,
+        dictionaryEntries,
+        sentence,
+        inputInfo: { eventType },
+        textSource,
+        optionsContext,
+    }) {
         const query = textSource.text();
         const historyState = this._history.state;
-        const historyMode = (
-            eventType === 'click' ||
+        const historyMode =
+            eventType === "click" ||
             !isObject(historyState) ||
-            historyState.cause !== 'queryParser'
-        ) ? 'new' : 'overwrite';
+            historyState.cause !== "queryParser"
+                ? "new"
+                : "overwrite";
         const details = {
             focus: false,
             historyMode,
@@ -675,30 +873,32 @@ class Display extends EventDispatcher {
             state: {
                 sentence,
                 optionsContext,
-                cause: 'queryParser'
+                cause: "queryParser",
             },
             content: {
                 dictionaryEntries,
-                contentOrigin: this.getContentOrigin()
-            }
+                contentOrigin: this.getContentOrigin(),
+            },
         };
         this.setContent(details);
     }
 
     _onExtensionUnloaded() {
-        const type = 'unloaded';
-        if (this._contentType === type) { return; }
+        const type = "unloaded";
+        if (this._contentType === type) {
+            return;
+        }
         const details = {
             focus: false,
-            historyMode: 'clear',
-            params: {type},
+            historyMode: "clear",
+            params: { type },
             state: {},
             content: {
                 contentOrigin: {
                     tabId: this._tabId,
-                    frameId: this._frameId
-                }
-            }
+                    frameId: this._frameId,
+                },
+            },
         };
         this.setContent(details);
     }
@@ -718,7 +918,7 @@ class Display extends EventDispatcher {
         this._nextTermView();
     }
 
-    _onProgressIndicatorVisibleChanged({value}) {
+    _onProgressIndicatorVisibleChanged({ value }) {
         if (this._progressIndicatorTimer !== null) {
             clearTimeout(this._progressIndicatorTimer);
             this._progressIndicatorTimer = null;
@@ -726,10 +926,12 @@ class Display extends EventDispatcher {
 
         if (value) {
             this._progressIndicator.hidden = false;
-            getComputedStyle(this._progressIndicator).getPropertyValue('display'); // Force update of CSS display property, allowing animation
-            this._progressIndicator.dataset.active = 'true';
+            getComputedStyle(this._progressIndicator).getPropertyValue(
+                "display"
+            ); // Force update of CSS display property, allowing animation
+            this._progressIndicator.dataset.active = "true";
         } else {
-            this._progressIndicator.dataset.active = 'false';
+            this._progressIndicator.dataset.active = "false";
             this._progressIndicatorTimer = setTimeout(() => {
                 this._progressIndicator.hidden = true;
                 this._progressIndicatorTimer = null;
@@ -740,29 +942,40 @@ class Display extends EventDispatcher {
     async _onKanjiLookup(e) {
         try {
             e.preventDefault();
-            if (!this._historyHasState()) { return; }
+            if (!this._historyHasState()) {
+                return;
+            }
 
-            let {state: {sentence, url, documentTitle}} = this._history;
-            if (typeof url !== 'string') { url = window.location.href; }
-            if (typeof documentTitle !== 'string') { documentTitle = document.title; }
+            let {
+                state: { sentence, url, documentTitle },
+            } = this._history;
+            if (typeof url !== "string") {
+                url = window.location.href;
+            }
+            if (typeof documentTitle !== "string") {
+                documentTitle = document.title;
+            }
             const optionsContext = this.getOptionsContext();
             const query = e.currentTarget.textContent;
-            const dictionaryEntries = await yomichan.api.kanjiFind(query, optionsContext);
+            const dictionaryEntries = await yomichan.api.kanjiFind(
+                query,
+                optionsContext
+            );
             const details = {
                 focus: false,
-                historyMode: 'new',
-                params: this._createSearchParams('kanji', query, false),
+                historyMode: "new",
+                params: this._createSearchParams("kanji", query, false),
                 state: {
                     focusEntry: 0,
                     optionsContext,
                     url,
                     sentence,
-                    documentTitle
+                    documentTitle,
                 },
                 content: {
                     dictionaryEntries,
-                    contentOrigin: this.getContentOrigin()
-                }
+                    contentOrigin: this.getContentOrigin(),
+                },
             };
             this.setContent(details);
         } catch (error) {
@@ -868,7 +1081,9 @@ class Display extends EventDispatcher {
     }
 
     _onHistoryWheel(e) {
-        if (e.altKey) { return; }
+        if (e.altKey) {
+            return;
+        }
         const delta = -e.deltaX || e.deltaY;
         if (delta > 0) {
             this._sourceTermView();
@@ -920,10 +1135,14 @@ class Display extends EventDispatcher {
     }
 
     _onEntryClick(e) {
-        if (e.button !== 0) { return; }
+        if (e.button !== 0) {
+            return;
+        }
         const node = e.currentTarget;
         const index = parseInt(node.dataset.index, 10);
-        if (!Number.isFinite(index)) { return; }
+        if (!Number.isFinite(index)) {
+            return;
+        }
         this._entrySetCurrent(index);
     }
 
@@ -933,24 +1152,38 @@ class Display extends EventDispatcher {
 
     _showTagNotification(tagNode) {
         tagNode = tagNode.parentNode;
-        if (tagNode === null) { return; }
+        if (tagNode === null) {
+            return;
+        }
 
         if (this._tagNotification === null) {
             const node = this._displayGenerator.createEmptyFooterNotification();
-            node.classList.add('click-scannable');
-            this._tagNotification = new DisplayNotification(this._footerNotificationContainer, node);
+            node.classList.add("click-scannable");
+            this._tagNotification = new DisplayNotification(
+                this._footerNotificationContainer,
+                node
+            );
         }
 
         const index = this.getElementDictionaryEntryIndex(tagNode);
-        const dictionaryEntry = (index >= 0 && index < this._dictionaryEntries.length ? this._dictionaryEntries[index] : null);
+        const dictionaryEntry =
+            index >= 0 && index < this._dictionaryEntries.length
+                ? this._dictionaryEntries[index]
+                : null;
 
-        const content = this._displayGenerator.createTagFooterNotificationDetails(tagNode, dictionaryEntry);
+        const content =
+            this._displayGenerator.createTagFooterNotificationDetails(
+                tagNode,
+                dictionaryEntry
+            );
         this._tagNotification.setContent(content);
         this._tagNotification.open();
     }
 
     _hideTagNotification(animate) {
-        if (this._tagNotification === null) { return; }
+        if (this._tagNotification === null) {
+            return;
+        }
         this._tagNotification.close(animate);
     }
 
@@ -1026,11 +1259,16 @@ class Display extends EventDispatcher {
         }
     }
 
-    async _setContentTermsOrKanji(token, type, query, queryFull, eventArgs) {
-        
+    async _setContentTermsOrKanjiOrSentences(
+        token,
+        type,
+        query,
+        queryFull,
+        eventArgs
+    ) {
         const lookup = eventArgs.urlSearchParams.get("lookup") !== "false";
 
-        let {state, content} = this._history;
+        let { state, content } = this._history;
         let changeHistory = false;
         if (!isObject(content)) {
             content = {};
@@ -1042,13 +1280,15 @@ class Display extends EventDispatcher {
         }
 
         let {
-            focusEntry=null,
-            scrollX=null,
-            scrollY=null,
-            optionsContext=null
+            focusEntry = null,
+            scrollX = null,
+            scrollY = null,
+            optionsContext = null,
         } = state;
-        if (typeof focusEntry !== 'number') { focusEntry = 0; }
-        if (!(typeof optionsContext === 'object' && optionsContext !== null)) {
+        if (typeof focusEntry !== "number") {
+            focusEntry = 0;
+        }
+        if (!(typeof optionsContext === "object" && optionsContext !== null)) {
             optionsContext = this.getOptionsContext();
             state.optionsContext = optionsContext;
             changeHistory = true;
@@ -1057,19 +1297,29 @@ class Display extends EventDispatcher {
         this._setFullQuery(queryFull);
         this._setTitleText(query);
 
-        let {dictionaryEntries} = content;
+        let { dictionaryEntries } = content;
         if (!Array.isArray(dictionaryEntries)) {
-            dictionaryEntries = lookup && query.length > 0 ? await this._findDictionaryEntries(type, query, optionsContext, eventArgs) : [];
-            if (this._setContentToken !== token) { return; }
+            dictionaryEntries =
+                lookup && query.length > 0
+                    ? await this._findDictionaryEntries(
+                          type,
+                          query,
+                          optionsContext,
+                          eventArgs
+                      )
+                    : [];
+            if (this._setContentToken !== token) {
+                return;
+            }
             content.dictionaryEntries = dictionaryEntries;
             changeHistory = true;
         }
 
         let contentOriginValid = false;
-        const {contentOrigin} = content;
-        if (typeof contentOrigin === 'object' && contentOrigin !== null) {
-            const {tabId, frameId} = contentOrigin;
-            if (typeof tabId === 'number' && typeof frameId === 'number') {
+        const { contentOrigin } = content;
+        if (typeof contentOrigin === "object" && contentOrigin !== null) {
+            const { tabId, frameId } = contentOrigin;
+            if (typeof tabId === "number" && typeof frameId === "number") {
                 this._contentOriginTabId = tabId;
                 this._contentOriginFrameId = frameId;
                 contentOriginValid = true;
@@ -1081,11 +1331,15 @@ class Display extends EventDispatcher {
         }
 
         await this._setOptionsContextIfDifferent(optionsContext);
-        if (this._setContentToken !== token) { return; }
+        if (this._setContentToken !== token) {
+            return;
+        }
 
         if (this._options === null) {
             await this.updateOptions();
-            if (this._setContentToken !== token) { return; }
+            if (this._setContentToken !== token) {
+                return;
+            }
         }
 
         if (changeHistory) {
@@ -1094,26 +1348,34 @@ class Display extends EventDispatcher {
 
         eventArgs.source = query;
         eventArgs.content = content;
-        this.trigger('contentUpdating', eventArgs);
+        this.trigger("contentUpdating", eventArgs);
 
         this._dictionaryEntries = dictionaryEntries;
 
-        this._updateNavigation(this._history.hasPrevious(), this._history.hasNext());
+        this._updateNavigation(
+            this._history.hasPrevious(),
+            this._history.hasNext()
+        );
         this._setNoContentVisible(dictionaryEntries.length === 0 && lookup);
 
         const container = this._container;
-        container.textContent = '';
+        container.textContent = "";
 
         this._displayAnki.setupEntriesBegin();
 
-        for (let i = 0, ii = dictionaryEntries.length - (type === "sentences" ? 1 : 0); i < ii; ++i) {
+        for (
+            let i = 0,
+                ii = dictionaryEntries.length - (type === "sentences" ? 1 : 0);
+            i < ii;
+            ++i
+        ) {
             // when type is "sentences", skip last element because its doesnt contain a sentence but the object:
             // {
             //  resultCount,
             //  pageCount
             // {
             // which will be used for navigation bar
-            
+
             if (i > 0) {
                 await promiseTimeout(1);
                 if (this._setContentToken !== token) {
@@ -1141,17 +1403,25 @@ class Display extends EventDispatcher {
         if (dictionaryEntries.length !== 0 && type === "sentences") {
             const { resultCount, pageCount } = dictionaryEntries.at(-1);
             const currentPage = parseInt(eventArgs.urlSearchParams.get("page"));
-            const entry = this._createNavigationEntry(currentPage, resultCount, pageCount);
+            const entry = this._createNavigationEntry(
+                currentPage,
+                resultCount,
+                pageCount
+            );
             this._dictionaryEntryNodes.push(entry);
             this._displaySentences.setupEntry(entry, 0);
             container.append(entry);
             this._elementOverflowController.addElements(entry);
         }
 
-        if (typeof scrollX === 'number' || typeof scrollY === 'number') {
-            let {x, y} = this._windowScroll;
-            if (typeof scrollX === 'number') { x = scrollX; }
-            if (typeof scrollY === 'number') { y = scrollY; }
+        if (typeof scrollX === "number" || typeof scrollY === "number") {
+            let { x, y } = this._windowScroll;
+            if (typeof scrollX === "number") {
+                x = scrollX;
+            }
+            if (typeof scrollY === "number") {
+                y = scrollY;
+            }
             this._windowScroll.stop();
             this._windowScroll.to(x, y);
         }
@@ -1175,14 +1445,18 @@ class Display extends EventDispatcher {
             case "kanji":
                 return this._displayGenerator.createKanjiEntry(dictionaryEntry);
             case "sentences":
-                return this._displayGenerator.createSentencesEntry(dictionaryEntry);
+                return this._displayGenerator.createSentencesEntry(
+                    dictionaryEntry
+                );
             default:
                 break;
         }
     }
 
     _setContentExtensionUnloaded() {
-        const errorExtensionUnloaded = document.querySelector('#error-extension-unloaded');
+        const errorExtensionUnloaded = document.querySelector(
+            "#error-extension-unloaded"
+        );
 
         if (this._container !== null) {
             this._container.hidden = true;
@@ -1194,18 +1468,18 @@ class Display extends EventDispatcher {
 
         this._updateNavigation(false, false);
         this._setNoContentVisible(false);
-        this._setTitleText('');
-        this._setFullQuery('');
+        this._setTitleText("");
+        this._setFullQuery("");
     }
 
     _clearContent() {
-        this._container.textContent = '';
-        this._setTitleText('');
-        this._setFullQuery('');
+        this._container.textContent = "";
+        this._setTitleText("");
+        this._setFullQuery("");
     }
 
     _setNoContentVisible(visible) {
-        const noResults = document.querySelector('#no-results');
+        const noResults = document.querySelector("#no-results");
 
         if (noResults !== null) {
             noResults.hidden = !visible;
@@ -1239,11 +1513,15 @@ class Display extends EventDispatcher {
         let title = this._defaultTitle;
         if (text.length > 0) {
             // Chrome limits title to 1024 characters
-            const ellipsis = '...';
-            const separator = ' - ';
-            const maxLength = this._titleMaxLength - title.length - separator.length;
+            const ellipsis = "...";
+            const separator = " - ";
+            const maxLength =
+                this._titleMaxLength - title.length - separator.length;
             if (text.length > maxLength) {
-                text = `${text.substring(0, Math.max(0, maxLength - ellipsis.length))}${ellipsis}`;
+                text = `${text.substring(
+                    0,
+                    Math.max(0, maxLength - ellipsis.length)
+                )}${ellipsis}`;
             }
 
             title = `${text}${separator}${title}`;
@@ -1252,7 +1530,7 @@ class Display extends EventDispatcher {
     }
 
     _updateNavigation(previous, next) {
-        const {documentElement} = document;
+        const { documentElement } = document;
         if (documentElement !== null) {
             documentElement.dataset.hasNavigationPrevious = `${previous}`;
             documentElement.dataset.hasNavigationNext = `${next}`;
@@ -1268,12 +1546,12 @@ class Display extends EventDispatcher {
     _entrySetCurrent(index) {
         const entryPre = this._getEntry(this._index);
         if (entryPre !== null) {
-            entryPre.classList.remove('entry-current');
+            entryPre.classList.remove("entry-current");
         }
 
         const entry = this._getEntry(index);
         if (entry !== null) {
-            entry.classList.add('entry-current');
+            entry.classList.add("entry-current");
         }
 
         this._index = index;
@@ -1282,10 +1560,14 @@ class Display extends EventDispatcher {
     }
 
     _focusEntry(index, smooth) {
-        index = Math.max(Math.min(index, this._dictionaryEntries.length - 1), 0);
+        index = Math.max(
+            Math.min(index, this._dictionaryEntries.length - 1),
+            0
+        );
 
         const entry = this._entrySetCurrent(index);
-        let target = index === 0 || entry === null ? 0 : this._getElementTop(entry);
+        let target =
+            index === 0 || entry === null ? 0 : this._getElementTop(entry);
 
         if (this._navigationHeader !== null) {
             target -= this._navigationHeader.getBoundingClientRect().height;
@@ -1301,16 +1583,27 @@ class Display extends EventDispatcher {
 
     _focusEntryWithDifferentDictionary(offset, smooth) {
         const offsetSign = Math.sign(offset);
-        if (offsetSign === 0) { return false; }
+        if (offsetSign === 0) {
+            return false;
+        }
 
         let index = this._index;
         const dictionaryEntryCount = this._dictionaryEntries.length;
-        if (index < 0 || index >= dictionaryEntryCount) { return false; }
+        if (index < 0 || index >= dictionaryEntryCount) {
+            return false;
+        }
 
-        const {dictionary} = this._dictionaryEntries[index];
-        for (let indexNext = index + offsetSign; indexNext >= 0 && indexNext < dictionaryEntryCount; indexNext += offsetSign) {
-            const {dictionaryNames} = this._dictionaryEntries[indexNext];
-            if (dictionaryNames.length > 1 || !dictionaryNames.includes(dictionary)) {
+        const { dictionary } = this._dictionaryEntries[index];
+        for (
+            let indexNext = index + offsetSign;
+            indexNext >= 0 && indexNext < dictionaryEntryCount;
+            indexNext += offsetSign
+        ) {
+            const { dictionaryNames } = this._dictionaryEntries[indexNext];
+            if (
+                dictionaryNames.length > 1 ||
+                !dictionaryNames.includes(dictionary)
+            ) {
                 offset -= offsetSign;
                 if (Math.sign(offsetSign) !== offset) {
                     index = indexNext;
@@ -1319,7 +1612,9 @@ class Display extends EventDispatcher {
             }
         }
 
-        if (index === this._index) { return false; }
+        if (index === this._index) {
+            return false;
+        }
 
         this._focusEntry(index, smooth);
         return true;
@@ -1356,7 +1651,8 @@ class Display extends EventDispatcher {
 
     _getElementTop(element) {
         const elementRect = element.getBoundingClientRect();
-        const documentRect = this._contentScrollBodyElement.getBoundingClientRect();
+        const documentRect =
+            this._contentScrollBodyElement.getBoundingClientRect();
         return elementRect.top - documentRect.top;
     }
 
@@ -1365,8 +1661,10 @@ class Display extends EventDispatcher {
     }
 
     _updateHistoryState() {
-        const {state, content} = this._history;
-        if (!isObject(state)) { return; }
+        const { state, content } = this._history;
+        if (!isObject(state)) {
+            return;
+        }
 
         state.focusEntry = this._index;
         state.scrollX = this._windowScroll.x;
@@ -1384,20 +1682,20 @@ class Display extends EventDispatcher {
         }
     }
 
-    _createSearchParams(type, query, wildcards,  reading = null, page = null) {
+    _createSearchParams(type, query, wildcards, reading = null, page = null) {
         const params = {};
         if (query.length < this._fullQuery.length) {
             params.full = this._fullQuery;
         }
         params.query = query;
-        if (typeof type === 'string') {
+        if (typeof type === "string") {
             params.type = type;
         }
         if (!wildcards) {
-            params.wildcards = 'off';
+            params.wildcards = "off";
         }
         if (this._queryParserVisibleOverride !== null) {
-            params['full-visible'] = `${this._queryParserVisibleOverride}`;
+            params["full-visible"] = `${this._queryParserVisibleOverride}`;
         }
         if (reading !== null) {
             params.reading = reading;
@@ -1409,42 +1707,43 @@ class Display extends EventDispatcher {
     }
 
     _isQueryParserVisible() {
-        return (
-            this._queryParserVisibleOverride !== null ?
-            this._queryParserVisibleOverride :
-            this._queryParserVisible
-        );
+        return this._queryParserVisibleOverride !== null
+            ? this._queryParserVisibleOverride
+            : this._queryParserVisible;
     }
 
     _closePopups() {
-        yomichan.trigger('closePopups');
+        yomichan.trigger("closePopups");
     }
 
     async _setOptionsContextIfDifferent(optionsContext) {
-        if (deepEqual(this._optionsContext, optionsContext)) { return; }
+        if (deepEqual(this._optionsContext, optionsContext)) {
+            return;
+        }
         await this.setOptionsContext(optionsContext);
     }
 
     _setContentScale(scale) {
         const body = document.body;
-        if (body === null) { return; }
+        if (body === null) {
+            return;
+        }
         body.style.fontSize = `${scale}em`;
     }
 
     async _updateNestedFrontend(options) {
-        const isSearchPage = (this._pageType === 'search');
-        const isEnabled = (
+        const isSearchPage = this._pageType === "search";
+        const isEnabled =
             this._childrenSupported &&
-            typeof this._tabId === 'number' &&
-            (
-                (isSearchPage) ?
-                (options.scanning.enableOnSearchPage) :
-                (this._depth < options.scanning.popupNestingMaxDepth)
-            )
-        );
+            typeof this._tabId === "number" &&
+            (isSearchPage
+                ? options.scanning.enableOnSearchPage
+                : this._depth < options.scanning.popupNestingMaxDepth);
 
         if (this._frontend === null) {
-            if (!isEnabled) { return; }
+            if (!isEnabled) {
+                return;
+            }
 
             try {
                 if (this._frontendSetupPromise === null) {
@@ -1466,19 +1765,19 @@ class Display extends EventDispatcher {
         const setupNestedPopupsOptions = {
             useProxyPopup: this._parentFrameId !== null,
             parentPopupId: this._parentPopupId,
-            parentFrameId: this._parentFrameId
+            parentFrameId: this._parentFrameId,
         };
 
         await dynamicLoader.loadScripts([
-            '/js/language/text-scanner.js',
-            '/js/comm/frame-client.js',
-            '/js/app/popup.js',
-            '/js/app/popup-proxy.js',
-            '/js/app/popup-window.js',
-            '/js/app/popup-factory.js',
-            '/js/comm/frame-ancestry-handler.js',
-            '/js/comm/frame-offset-forwarder.js',
-            '/js/app/frontend.js'
+            "/js/language/text-scanner.js",
+            "/js/comm/frame-client.js",
+            "/js/app/popup.js",
+            "/js/app/popup-proxy.js",
+            "/js/app/popup-window.js",
+            "/js/app/popup-factory.js",
+            "/js/comm/frame-ancestry-handler.js",
+            "/js/comm/frame-offset-forwarder.js",
+            "/js/app/frontend.js",
         ]);
 
         const popupFactory = new PopupFactory(this._frameId);
@@ -1492,7 +1791,7 @@ class Display extends EventDispatcher {
             pageType: this._pageType,
             allowRootFramePopupProxy: true,
             childrenSupported: this._childrenSupported,
-            hotkeyHandler: this._hotkeyHandler
+            hotkeyHandler: this._hotkeyHandler,
         });
 
         const frontend = new Frontend(setupNestedPopupsOptions);
@@ -1501,7 +1800,12 @@ class Display extends EventDispatcher {
     }
 
     _copyHostSelection() {
-        if (this._contentOriginFrameId === null || window.getSelection().toString()) { return false; }
+        if (
+            this._contentOriginFrameId === null ||
+            window.getSelection().toString()
+        ) {
+            return false;
+        }
         this._copyHostSelectionSafe();
         return true;
     }
@@ -1516,12 +1820,14 @@ class Display extends EventDispatcher {
 
     async _copyHostSelectionInner() {
         switch (this._browser) {
-            case 'firefox':
-            case 'firefox-mobile':
+            case "firefox":
+            case "firefox-mobile":
                 {
                     let text;
                     try {
-                        text = await this.invokeContentOrigin('getSelectionText');
+                        text = await this.invokeContentOrigin(
+                            "getSelectionText"
+                        );
                     } catch (e) {
                         break;
                     }
@@ -1529,25 +1835,27 @@ class Display extends EventDispatcher {
                 }
                 break;
             default:
-                await this.invokeContentOrigin('copySelection');
+                await this.invokeContentOrigin("copySelection");
                 break;
         }
     }
 
     _copyText(text) {
         const parent = document.body;
-        if (parent === null) { return; }
+        if (parent === null) {
+            return;
+        }
 
         let textarea = this._copyTextarea;
         if (textarea === null) {
-            textarea = document.createElement('textarea');
+            textarea = document.createElement("textarea");
             this._copyTextarea = textarea;
         }
 
         textarea.value = text;
         parent.appendChild(textarea);
         textarea.select();
-        document.execCommand('copy');
+        document.execCommand("copy");
         parent.removeChild(textarea);
     }
 
@@ -1558,10 +1866,29 @@ class Display extends EventDispatcher {
     }
 
     _addEntryEventListeners(entry) {
-        this._eventListeners.addEventListener(entry, 'click', this._onEntryClick.bind(this));
-        this._addMultipleEventListeners(entry, '.headword-kanji-link', 'click', this._onKanjiLookup.bind(this));
-        this._addMultipleEventListeners(entry, '.debug-log-link', 'click', this._onDebugLogClick.bind(this));
-        this._addMultipleEventListeners(entry, '.tag-label', 'click', this._onTagClick.bind(this));
+        this._eventListeners.addEventListener(
+            entry,
+            "click",
+            this._onEntryClick.bind(this)
+        );
+        this._addMultipleEventListeners(
+            entry,
+            ".headword-kanji-link",
+            "click",
+            this._onKanjiLookup.bind(this)
+        );
+        this._addMultipleEventListeners(
+            entry,
+            ".debug-log-link",
+            "click",
+            this._onDebugLogClick.bind(this)
+        );
+        this._addMultipleEventListeners(
+            entry,
+            ".tag-label",
+            "click",
+            this._onTagClick.bind(this)
+        );
     }
 
     _updateContentTextScanner(options) {
@@ -1581,31 +1908,44 @@ class Display extends EventDispatcher {
                 searchTerms: true,
                 searchKanji: false,
                 searchOnClick: true,
-                searchOnClickOnly: true
+                searchOnClickOnly: true,
             });
-            this._contentTextScanner.includeSelector = '.click-scannable,.click-scannable *';
-            this._contentTextScanner.excludeSelector = '.scan-disable,.scan-disable *';
+            this._contentTextScanner.includeSelector =
+                ".click-scannable,.click-scannable *";
+            this._contentTextScanner.excludeSelector =
+                ".scan-disable,.scan-disable *";
             this._contentTextScanner.prepare();
-            this._contentTextScanner.on('clear', this._onContentTextScannerClear.bind(this));
-            this._contentTextScanner.on('searched', this._onContentTextScannerSearched.bind(this));
+            this._contentTextScanner.on(
+                "clear",
+                this._onContentTextScannerClear.bind(this)
+            );
+            this._contentTextScanner.on(
+                "searched",
+                this._onContentTextScannerSearched.bind(this)
+            );
         }
 
-        const {scanning: scanningOptions, sentenceParsing: sentenceParsingOptions} = options;
+        const {
+            scanning: scanningOptions,
+            sentenceParsing: sentenceParsingOptions,
+        } = options;
         this._contentTextScanner.setOptions({
-            inputs: [{
-                include: 'mouse0',
-                exclude: '',
-                types: {mouse: true, pen: false, touch: false},
-                options: {
-                    searchTerms: true,
-                    searchKanji: true,
-                    scanOnTouchMove: false,
-                    scanOnPenHover: false,
-                    scanOnPenPress: false,
-                    scanOnPenRelease: false,
-                    preventTouchScrolling: false
-                }
-            }],
+            inputs: [
+                {
+                    include: "mouse0",
+                    exclude: "",
+                    types: { mouse: true, pen: false, touch: false },
+                    options: {
+                        searchTerms: true,
+                        searchKanji: true,
+                        scanOnTouchMove: false,
+                        scanOnPenHover: false,
+                        scanOnPenPress: false,
+                        scanOnPenRelease: false,
+                        preventTouchScrolling: false,
+                    },
+                },
+            ],
             deepContentScan: scanningOptions.deepDomScan,
             selectText: false,
             delay: scanningOptions.delay,
@@ -1614,7 +1954,7 @@ class Display extends EventDispatcher {
             scanLength: scanningOptions.length,
             layoutAwareScan: scanningOptions.layoutAwareScan,
             preventMiddleMouse: false,
-            sentenceParsingOptions
+            sentenceParsingOptions,
         });
 
         this._contentTextScanner.setEnabled(true);
@@ -1624,42 +1964,51 @@ class Display extends EventDispatcher {
         this._contentTextScanner.clearSelection();
     }
 
-    _onContentTextScannerSearched({type, dictionaryEntries, sentence, textSource, optionsContext, error}) {
+    _onContentTextScannerSearched({
+        type,
+        dictionaryEntries,
+        sentence,
+        textSource,
+        optionsContext,
+        error,
+    }) {
         if (error !== null && !yomichan.isExtensionUnloaded) {
             log.error(error);
         }
 
-        if (type === null) { return; }
+        if (type === null) {
+            return;
+        }
 
         const query = textSource.text();
         const url = window.location.href;
         const documentTitle = document.title;
         const details = {
             focus: false,
-            historyMode: 'new',
+            historyMode: "new",
             params: {
                 type,
                 query,
-                wildcards: 'off'
+                wildcards: "off",
             },
             state: {
                 focusEntry: 0,
                 optionsContext,
                 url,
                 sentence,
-                documentTitle
+                documentTitle,
             },
             content: {
                 dictionaryEntries,
-                contentOrigin: this.getContentOrigin()
-            }
+                contentOrigin: this.getContentOrigin(),
+            },
         };
         this._contentTextScanner.clearSelection();
         this.setContent(details);
     }
 
     _getSearchContext() {
-        return {optionsContext: this.getOptionsContext()};
+        return { optionsContext: this.getOptionsContext() };
     }
 
     _updateHotkeys(options) {
@@ -1691,13 +2040,17 @@ class Display extends EventDispatcher {
     }
 
     _onHotkeyClose() {
-        if (this._closeSinglePopupMenu()) { return; }
+        if (this._closeSinglePopupMenu()) {
+            return;
+        }
         this.close();
     }
 
     _onHotkeyActionMoveRelative(sign, argument) {
         let count = Number.parseInt(argument, 10);
-        if (!Number.isFinite(count)) { count = 1; }
+        if (!Number.isFinite(count)) {
+            count = 1;
+        }
         count = Math.max(0, Math.floor(count));
         this._focusEntry(this._index + count * sign, true);
     }
@@ -1722,13 +2075,17 @@ class Display extends EventDispatcher {
 
     _postProcessQuery(query) {
         const queryPostProcessor = this._queryPostProcessor;
-        return typeof queryPostProcessor === 'function' ? queryPostProcessor(query) : query;
+        return typeof queryPostProcessor === "function"
+            ? queryPostProcessor(query)
+            : query;
     }
 
     async _logDictionaryEntryData(index) {
-        if (index < 0 || index >= this._dictionaryEntries.length) { return; }
+        if (index < 0 || index >= this._dictionaryEntries.length) {
+            return;
+        }
         const dictionaryEntry = this._dictionaryEntries[index];
-        const result = {dictionaryEntry};
+        const result = { dictionaryEntry };
 
         const result2 = await this._displayAnki.getLogData(dictionaryEntry);
         Object.assign(result, result2);
