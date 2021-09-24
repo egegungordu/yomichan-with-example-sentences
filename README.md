@@ -1,3 +1,21 @@
+# Example sentence support for yomichan
+
+When I use Yomichan sometimes I come across words that need more in-context usages to really make sense, so I generally use jisho or tatoeba to lookup sentences containing the word/kanji. I thought it would be really convenient to be able to lookup sentences right from Yomichan so to speed up the process I've made this version which fetches sentences from jisho. This fork was done on Yomichan version 21.8.31.1.
+
+Tested only on the chrome build.
+
+## Additions
+
+*   Display example sentences
+
+![](https://i.imgur.com/Ls8QYv5.gif)
+*   Get more sentences
+
+![](https://i.imgur.com/uDM71H8.gif)
+*   Change example sentence settings
+
+![](https://i.imgur.com/s7YOCaF.png)
+
 # Yomichan
 
 Yomichan turns your web browser into a tool for building Japanese language literacy by helping you to decipher texts
