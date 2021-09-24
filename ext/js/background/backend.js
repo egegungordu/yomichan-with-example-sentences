@@ -66,6 +66,9 @@ class Backend {
             japaneseUtil: this._japaneseUtil,
             requestBuilder: this._requestBuilder
         });
+        this._sentenceDownloader = new SentenceDownloader({
+            requestBuilder: this._requestBuilder
+        })
         this._optionsUtil = new OptionsUtil();
 
         this._searchPopupTabId = null;
@@ -101,6 +104,7 @@ class Backend {
             ['suspendAnkiCardsForNote',      {async: true,  contentScript: true,  handler: this._onApiSuspendAnkiCardsForNote.bind(this)}],
             ['commandExec',                  {async: false, contentScript: true,  handler: this._onApiCommandExec.bind(this)}],
             ['getTermAudioInfoList',         {async: true,  contentScript: true,  handler: this._onApiGetTermAudioInfoList.bind(this)}],
+            ["getSentences",                 {async: true,  contentScript: true,  handler: this._onApiGetSentences.bind(this)}],
             ['sendMessageToFrame',           {async: false, contentScript: true,  handler: this._onApiSendMessageToFrame.bind(this)}],
             ['broadcastTab',                 {async: false, contentScript: true,  handler: this._onApiBroadcastTab.bind(this)}],
             ['frameInformationGet',          {async: true,  contentScript: true,  handler: this._onApiFrameInformationGet.bind(this)}],
@@ -527,6 +531,10 @@ class Backend {
 
     async _onApiGetTermAudioInfoList({source, term, reading}) {
         return await this._audioDownloader.getTermAudioInfoList(source, term, reading);
+    }
+
+    async _onApiGetSentences({ term, reading, page }) {
+        return await this._sentenceDownloader.getSentences(term, reading, page);
     }
 
     _onApiSendMessageToFrame({frameId: targetFrameId, action, params}, sender) {
