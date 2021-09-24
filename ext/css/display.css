@@ -175,6 +175,8 @@
 
     --action-button-hover-color: #dddddd;
     --action-button-active-color: #c1c1c1;
+    --nav-button-active-content-color: #0275d8;
+    --nav-button-disabled-content-color: #000000;
 }
 :root[data-theme=dark] {
     /* Colors */
@@ -243,6 +245,8 @@
 
     --action-button-hover-color: #282828;
     --action-button-active-color: #444444;
+
+    --nav-button-disabled-content-color: #d4d4d4;
 }
 
 
@@ -657,6 +661,7 @@ button.action-button:active {
 .icon[data-icon=add-term-kanji] { background-image: url('/images/add-term-kanji.svg'); }
 .icon[data-icon=add-term-kana]  { background-image: url('/images/add-term-kana.svg'); }
 .icon[data-icon=play-audio]     { background-image: url('/images/play-audio.svg'); }
+.icon[data-icon=display-example-sentences] { background-image: url('/images/search.svg'); }
 .icon[data-icon=source-term]    { background-image: url('/images/source-term.svg'); }
 .icon[data-icon=entry-current]  { background-image: url('/images/entry-current.svg'); }
 .action-icon {
@@ -1885,6 +1890,9 @@ button.footer-notification-close-button {
 :root[data-audio-enabled=false] .action-play-audio {
     display: none;
 }
+:root[data-example-sentences-enabled=false] .action-display-example-sentences {
+    display: none;
+}
 :root[data-glossary-layout-mode=compact] .definition-tag-list,
 :root[data-glossary-layout-mode=compact] .definition-disambiguation-list:not([data-count='0']) {
     display: inline;
@@ -1941,4 +1949,57 @@ button.footer-notification-close-button {
 
 :root[data-popup-display-mode=full-width] .frame-resizer-container {
     display: none;
+}
+
+/* Sentence page */
+.entry[data-type="sentence"] .sentence-japanese {
+    padding: 0;
+}
+
+.entry[data-type="sentence"] .sentence-japanese li {
+    display: inline-block
+}
+
+.entry[data-type="sentence"] .sentence-japanese .furigana {
+    font-size: 65%;
+    display: block;
+}
+
+:root[data-example-sentences-furigana=false] .entry[data-type="sentence"] .sentence-japanese .furigana {
+    display: none;
+}
+
+.entry[data-type="sentence"] .sentence-top {
+    position: relative;
+}
+
+.entry[data-type="sentence"] .sentence-bottom {
+    position: relative;
+}
+
+/* Navigation bar */
+#navigation-bar {
+    display: block;
+    padding: 0 var(--entry-horizontal-padding);
+    text-align: center;
+}
+
+#navigation-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-button {
+    --button-content-color: var(--nav-button-active-content-color);
+    --button-border-color: transparent;
+    --button-shadow: none;
+    --button-hover-border-color: transparent;
+    --button-hover-shadow: none;
+    --button-active-border-color: transparent;
+    --button-active-shadow: none;
+    --button-disabled-content-color: var(--nav-button-disabled-content-color);
+    outline: none;
+    font-size: inherit;
+    border-radius: 0;
 }
