@@ -4,6 +4,8 @@ When I use Yomichan sometimes I come across words that need more in-context usag
 
 Tested only on the chrome build.
 
+Download from [here](https://github.com/egegungordu/yomichan-with-example-sentences/releases/latest).
+
 ## Additions
 
 *   Display example sentences
