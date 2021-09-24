@@ -1971,10 +1971,12 @@ button.footer-notification-close-button {
 
 .entry[data-type="sentence"] .sentence-top {
     position: relative;
+    font-size: 18px;
 }
 
 .entry[data-type="sentence"] .sentence-bottom {
     position: relative;
+    font-size: 18px;
 }
 
 /* Navigation bar */
